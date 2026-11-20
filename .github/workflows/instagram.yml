@@ -1,6 +1,7 @@
 # Instagram フィード自動更新
 #  - 毎時：投稿を取得し、変化があれば data/instagram.json と画像をコミット
-#  - 毎週：アクセストークンを延長してシークレットを上書き（60日で失効するため）
+#  - 毎週：IGトークン（IG…）を延長。Facebookページトークン（EAA…）の場合は何もしない
+#  - 手動 setup-fb-token：EAA…のトークンを無期限のページトークンに変換して保存（初回1回だけ）
 name: instagram-feed
 on:
   schedule:
@@ -11,7 +12,7 @@ on:
       task:
         description: "実行する処理"
         type: choice
-        options: [feed, refresh-token]
+        options: [feed, setup-fb-token, refresh-token]
         default: feed
 
 concurrency: instagram-feed
@@ -43,6 +44,27 @@ jobs:
             git push
           fi
 
+  setup-fb-token:
+    if: github.event_name == 'workflow_dispatch' && inputs.task == 'setup-fb-token'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Convert to page token & update secret
+        run: |
+          NEW=$(node scripts/fetch-instagram.mjs --setup-fb)
+          echo "::add-mask::$NEW"
+          test -n "$NEW"
+          gh secret set IG_ACCESS_TOKEN --body "$NEW" --repo "$GITHUB_REPOSITORY"
+          echo "IG_ACCESS_TOKEN をページトークンに置き換えました"
+        env:
+          IG_ACCESS_TOKEN: "${{ secrets.IG_ACCESS_TOKEN }}"
+          META_APP_ID: "${{ secrets.META_APP_ID }}"
+          META_APP_SECRET: "${{ secrets.META_APP_SECRET }}"
+          GH_TOKEN: "${{ secrets.GH_PAT }}"
+
   refresh-token:
     if: >-
       (github.event_name == 'schedule' && github.event.schedule == '41 18 * * 0') ||
@@ -56,9 +78,10 @@ jobs:
       - name: Refresh token & update secret
         run: |
           NEW=$(node scripts/fetch-instagram.mjs --refresh)
-          echo "::add-mask::$NEW"
-          test -n "$NEW"
-          gh secret set IG_ACCESS_TOKEN --body "$NEW" --repo "$GITHUB_REPOSITORY"
+          if [ -n "$NEW" ]; then
+            echo "::add-mask::$NEW"
+            gh secret set IG_ACCESS_TOKEN --body "$NEW" --repo "$GITHUB_REPOSITORY"
+          fi
         env:
           IG_ACCESS_TOKEN: "${{ secrets.IG_ACCESS_TOKEN }}"
           GH_TOKEN: "${{ secrets.GH_PAT }}"
