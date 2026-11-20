@@ -1,0 +1,64 @@
+# Instagram フィード自動更新
+#  - 毎時：投稿を取得し、変化があれば data/instagram.json と画像をコミット
+#  - 毎週：アクセストークンを延長してシークレットを上書き（60日で失効するため）
+name: instagram-feed
+on:
+  schedule:
+    - cron: "17 * * * *"     # 毎時17分（フィード取得）
+    - cron: "41 18 * * 0"    # 毎週月曜 3:41 JST（トークン延長）
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "実行する処理"
+        type: choice
+        options: [feed, refresh-token]
+        default: feed
+
+concurrency: instagram-feed
+
+jobs:
+  feed:
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule != '41 18 * * 0') ||
+      (github.event_name == 'workflow_dispatch' && inputs.task == 'feed')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Fetch Instagram
+        run: node scripts/fetch-instagram.mjs
+        env: { IG_ACCESS_TOKEN: "${{ secrets.IG_ACCESS_TOKEN }}" }
+      - name: Commit if changed
+        run: |
+          git add -A data assets/instagram
+          if git diff --cached --quiet; then
+            echo "変更なし"
+          else
+            git config user.name "instagram-bot"
+            git config user.email "instagram-bot@users.noreply.github.com"
+            git commit -m "chore: update instagram feed"
+            git push
+          fi
+
+  refresh-token:
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '41 18 * * 0') ||
+      (github.event_name == 'workflow_dispatch' && inputs.task == 'refresh-token')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Refresh token & update secret
+        run: |
+          NEW=$(node scripts/fetch-instagram.mjs --refresh)
+          echo "::add-mask::$NEW"
+          test -n "$NEW"
+          gh secret set IG_ACCESS_TOKEN --body "$NEW" --repo "$GITHUB_REPOSITORY"
+        env:
+          IG_ACCESS_TOKEN: "${{ secrets.IG_ACCESS_TOKEN }}"
+          GH_TOKEN: "${{ secrets.GH_PAT }}"
