@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- ▼ 仮公開中は検索エンジンに載せない。本番公開時にこの行を削除 -->
+<meta name="robots" content="noindex,nofollow">
 <title>EXTREME FUKUSHIMA－エクストリームふくしま - 福島県</title>
 <meta name="description" content="景色も、刺激も、エクストリームに楽しもう。福島の自然の中で、スリルあるアクティビティを通じて非日常を体験する旅。">
 <meta property="og:title" content="EXTREME FUKUSHIMA－エクストリームふくしま">
@@ -36,9 +38,10 @@ header.scrolled{background:rgba(13,13,13,.92);backdrop-filter:blur(6px)}
 .hdr{display:flex;align-items:center;justify-content:space-between;height:68px}
 .logo{display:flex;align-items:center;gap:10px;color:var(--white)}
 .logo img{height:34px;width:auto}
-.logo .txt{font-family:"Oswald";font-weight:700;font-size:20px;letter-spacing:.08em}
+.logo.has-img .txt{display:none}
+.logo .txt{white-space:nowrap;font-family:"Oswald";font-weight:700;font-size:20px;letter-spacing:.08em}
 nav.gnav ul{display:flex;gap:26px;list-style:none;align-items:center}
-nav.gnav a{color:var(--white);font-family:"Oswald";font-size:15px;letter-spacing:.08em}
+nav.gnav a{white-space:nowrap;color:var(--white);font-family:"Oswald";font-size:15px;letter-spacing:.08em}
 nav.gnav a:hover{color:var(--accent2)}
 .lang{display:flex;gap:6px;font-family:"Oswald";font-size:13px}
 .lang a{padding:2px 8px;border:1px solid rgba(255,255,255,.5);color:#fff}
@@ -52,7 +55,7 @@ body.menu-open .burger span:nth-child(3){top:21px;transform:rotate(-45deg)}
 
 /* hero */
 .hero{position:relative;min-height:100svh;display:flex;align-items:flex-end;color:#fff;padding:0;overflow:hidden;
-  background:#111 url("https://extremefukushima.ne.jp/wp-content/themes/_extreme_template/bin/image/kv_pc.gif") center/cover no-repeat}
+  background:#111 var(--kv-pc,none) center/cover no-repeat}
 .hero::before{content:"";position:absolute;inset:0;background:
   linear-gradient(180deg,rgba(0,0,0,.35) 0%,rgba(0,0,0,0) 35%,rgba(0,0,0,.75) 100%),
   radial-gradient(120% 80% at 80% 10%,rgba(255,75,31,.35),transparent 60%)}
@@ -132,6 +135,14 @@ body.menu-open .burger span:nth-child(3){top:21px;transform:rotate(-45deg)}
 .skeleton{animation:sk 1.2s infinite alternate}
 @keyframes sk{from{background:#1d1d1d}to{background:#2c2c2c}}
 
+/* movie thumbs (YouTube) */
+.movie-thumbs .th{background-size:cover;background-position:center;position:relative}
+.movie-thumbs .th.has-img::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.25)}
+.movie-thumbs .th span{position:relative;z-index:1}
+.ph-note{color:#888;font-size:14px;text-align:center;padding:20px}
+/* preview badge */
+.preview-badge{position:fixed;left:12px;bottom:12px;z-index:60;background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:6px 12px;border-radius:999px;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+
 /* caution */
 .caution{padding:clamp(40px,6vw,64px) 0}
 .caution .box{border:2px solid var(--ink);padding:clamp(20px,4vw,36px);background:#fff}
@@ -152,7 +163,7 @@ footer{background:var(--ink);color:#ccc;padding:56px 0 32px;font-size:13px}
 .copy{margin-top:40px;text-align:center;color:#777;font-family:"Oswald";letter-spacing:.06em}
 
 /* responsive */
-@media(max-width:900px){
+@media(max-width:1100px){
   .burger{display:block}
   nav.gnav{position:fixed;inset:0;background:rgba(13,13,13,.97);display:grid;place-items:center;opacity:0;pointer-events:none;transition:opacity .3s}
   body.menu-open nav.gnav{opacity:1;pointer-events:auto}
@@ -160,7 +171,7 @@ footer{background:var(--ink);color:#ccc;padding:56px 0 32px;font-size:13px}
   nav.gnav a{font-size:24px}
   .intro .wrap{grid-template-columns:1fr}
   .movie-thumbs{grid-template-columns:repeat(3,1fr)}
-  .hero{background-image:url("https://extremefukushima.ne.jp/wp-content/themes/_extreme_template/bin/image/kv_sp.gif")}
+  .hero{background-image:var(--kv-sp,var(--kv-pc,none))}
 }
 @media(max-width:600px){
   .news-list li a{grid-template-columns:1fr;gap:4px}
@@ -176,7 +187,7 @@ footer{background:var(--ink);color:#ccc;padding:56px 0 32px;font-size:13px}
 <header id="hdr">
   <div class="wrap hdr">
     <a class="logo" href="#top" aria-label="EXTREME FUKUSHIMA トップ">
-      <img src="https://extremefukushima.ne.jp/wp-content/themes/_extreme_template/bin/image/logo.png" alt="" onerror="this.remove()">
+      <img data-img="logo" alt="" hidden>
       <span class="txt">EXTREME FUKUSHIMA</span>
     </a>
     <nav class="gnav" aria-label="グローバルナビ">
@@ -211,9 +222,9 @@ footer{background:var(--ink);color:#ccc;padding:56px 0 32px;font-size:13px}
       <div>
         <p>火山ガスが立ちのぼる源泉を目指す探検、渓谷を駆け抜ける疾走、爆音のなかで味わう重力、そして氷上を走るバイク。福島の自然だからこそ出会える、スリルに満ちたアクティビティで、いつもの旅を超えた体験を。</p>
         <div class="intro-pics">
-          <img src="https://extremefukushima.ne.jp/wp-content/uploads/catch_pict-a.png" alt="" loading="lazy">
-          <img src="https://extremefukushima.ne.jp/wp-content/uploads/catch_pict-b.png" alt="" loading="lazy">
-          <img src="https://extremefukushima.ne.jp/wp-content/uploads/catch_pict-c.png" alt="" loading="lazy">
+          <img data-img="catch_a" alt="" loading="lazy">
+          <img data-img="catch_b" alt="" loading="lazy">
+          <img data-img="catch_c" alt="" loading="lazy">
         </div>
       </div>
     </div>
@@ -222,28 +233,15 @@ footer{background:var(--ink);color:#ccc;padding:56px 0 32px;font-size:13px}
   <section id="news">
     <div class="wrap">
       <div class="sec-head"><h2>NEWS</h2><p>お知らせ</p><a class="more" href="https://extremefukushima.ne.jp/news">VIEW ALL →</a></div>
-      <ul class="news-list">
-        <li><a href="#"><time>2026.08.xx</time><span class="tag">イベント</span><span>【イベント情報】要事前登録！9/20(日) チャンスクDAY</span></a></li>
-        <li><a href="#"><time>2026.08.xx</time><span class="tag">イベント</span><span>【イベント情報】11/14・15 ドリフト秋祭り</span></a></li>
-        <li><a href="#"><time>2026.07.xx</time><span class="tag">イベント</span><span>【イベント情報】8月11日 安達太良山 沼尻登山口</span></a></li>
-      </ul>
+      <ul class="news-list" id="newsList"></ul>
     </div>
   </section>
 
   <section id="movie" class="movie">
     <div class="wrap">
       <div class="sec-head"><h2>MOVIE</h2><p>動画で体感するエクストリームふくしま</p></div>
-      <div class="movie-main" id="movieMain">
-        <!-- YouTube の動画IDを data-id に設定すると埋め込まれます -->
-        <div style="position:absolute;inset:0;display:grid;place-items:center;color:#888;font-size:14px">▶ 動画（YouTube埋め込み枠）</div>
-      </div>
-      <div class="movie-thumbs" id="movieThumbs">
-        <button class="on" data-id=""><div class="th">15s CM</div><span>15秒CM</span></button>
-        <button data-id=""><div class="th">ADVENTURE</div><span>ADVENTURE篇</span></button>
-        <button data-id=""><div class="th">X SPORTS</div><span>X SPORTS篇</span></button>
-        <button data-id=""><div class="th">AMAZING VIEW</div><span>AMAZING VIEW篇</span></button>
-        <button data-id=""><div class="th">BRAND MOVIE</div><span>ブランドムービー</span></button>
-      </div>
+      <div class="movie-main" id="movieMain"></div>
+      <div class="movie-thumbs" id="movieThumbs"></div>
     </div>
   </section>
 
@@ -279,10 +277,7 @@ footer{background:var(--ink);color:#ccc;padding:56px 0 32px;font-size:13px}
   <section id="activity_map" style="padding-top:0">
     <div class="wrap">
       <div class="sec-head"><h2>ACTIVITY MAP</h2><p>アクティビティマップ</p></div>
-      <div class="map-box">
-        <!-- 本番では現行サイトの Google マイマップ iframe をここに貼り付け -->
-        Google マイマップ埋め込み枠<br>（現行サイトの iframe コードをそのまま移植します）
-      </div>
+      <div class="map-box" id="mapBox"></div>
     </div>
   </section>
 
@@ -339,6 +334,41 @@ footer{background:var(--ink);color:#ccc;padding:56px 0 32px;font-size:13px}
   </div>
 </footer>
 
+<!-- ================================================================
+  ▼ サイト設定（素材がそろったら、ここだけ書き換えればOK）
+  - images     : assets/img/ に置いた画像を優先。無ければ現行サイトの画像を表示（移管前の仮対応）
+  - movies     : youtubeId に動画ID（URLの v= の後ろ11文字）か動画URLを入れると再生・サムネイル表示
+  - mapEmbedUrl: Googleマイマップの埋め込みURL（iframe の src="…" の中身）
+  - news       : 上から新しい順。url が空ならリンクなし
+  - preview    : true の間は左下に「テスト版」表示（本番で false に）
+================================================================= -->
+<script id="site-config" type="application/json">
+{
+  "preview": true,
+  "images": {
+    "logo":    ["assets/img/logo.png",         "https://extremefukushima.ne.jp/wp-content/themes/_extreme_template/bin/image/logo.png"],
+    "kv_pc":   ["assets/img/kv_pc.gif",        "https://extremefukushima.ne.jp/wp-content/themes/_extreme_template/bin/image/kv_pc.gif"],
+    "kv_sp":   ["assets/img/kv_sp.gif",        "https://extremefukushima.ne.jp/wp-content/themes/_extreme_template/bin/image/kv_sp.gif"],
+    "catch_a": ["assets/img/catch_pict-a.png", "https://extremefukushima.ne.jp/wp-content/uploads/catch_pict-a.png"],
+    "catch_b": ["assets/img/catch_pict-b.png", "https://extremefukushima.ne.jp/wp-content/uploads/catch_pict-b.png"],
+    "catch_c": ["assets/img/catch_pict-c.png", "https://extremefukushima.ne.jp/wp-content/uploads/catch_pict-c.png"]
+  },
+  "movies": [
+    { "label": "15s CM",       "title": "15秒CM",          "youtubeId": "" },
+    { "label": "ADVENTURE",    "title": "ADVENTURE篇",     "youtubeId": "" },
+    { "label": "X SPORTS",     "title": "X SPORTS篇",      "youtubeId": "" },
+    { "label": "AMAZING VIEW", "title": "AMAZING VIEW篇",  "youtubeId": "" },
+    { "label": "BRAND MOVIE",  "title": "ブランドムービー", "youtubeId": "" }
+  ],
+  "mapEmbedUrl": "",
+  "news": [
+    { "date": "", "tag": "イベント", "title": "【イベント情報】要事前登録！9/20(日) チャンスクDAY", "url": "" },
+    { "date": "", "tag": "イベント", "title": "【イベント情報】11/14・15 ドリフト秋祭り",          "url": "" },
+    { "date": "", "tag": "イベント", "title": "【イベント情報】8月11日 安達太良山 沼尻登山口",     "url": "" }
+  ]
+}
+</script>
+
 <!-- サンプルデータ（data/instagram.json が読めない環境＝ローカルでファイルを直接開いた場合などに使用） -->
 <script id="ig-fallback" type="application/json">
 {"account":"extreme_fukushima_official","updated_at":null,"sample":true,"posts":[
@@ -365,13 +395,50 @@ const burger=document.querySelector('.burger');
 burger.addEventListener('click',()=>{const o=document.body.classList.toggle('menu-open');burger.setAttribute('aria-expanded',o)});
 document.querySelectorAll('nav.gnav a').forEach(a=>a.addEventListener('click',()=>document.body.classList.remove('menu-open')));
 
-/* ---------- movie ---------- */
+/* ---------- site config ---------- */
+const SITE=JSON.parse(document.getElementById('site-config').textContent);
+const escH=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ytId=v=>{v=String(v||'').trim();const m=v.match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([\w-]{11})/);return m?m[1]:(/^[\w-]{11}$/.test(v)?v:'')};
+
+/* 画像：assets/img を優先し、無ければ現行サイトの画像 */
+function pickImg(key){
+  const list=(SITE.images||{})[key]||[];
+  return new Promise(res=>{const tryAt=i=>{if(i>=list.length)return res(null);const im=new Image();im.onload=()=>res(list[i]);im.onerror=()=>tryAt(i+1);im.src=list[i]};tryAt(0)});
+}
+document.querySelectorAll('img[data-img]').forEach(async el=>{const u=await pickImg(el.dataset.img);
+  if(u){el.src=u;el.hidden=false;if(el.dataset.img==='logo')el.closest('.logo').classList.add('has-img')}else el.remove()});
+(async()=>{const hero=document.querySelector('.hero');
+  const [pc,sp]=await Promise.all([pickImg('kv_pc'),pickImg('kv_sp')]);
+  if(pc)hero.style.setProperty('--kv-pc',`url("${pc}")`);if(sp)hero.style.setProperty('--kv-sp',`url("${sp}")`);})();
+
+/* ---------- NEWS ---------- */
+(()=>{const ul=document.getElementById('newsList');const items=(SITE.news||[]).filter(n=>n.title);
+  if(!items.length){ul.outerHTML='<p class="ph-note">お知らせは準備中です。</p>';return}
+  ul.innerHTML=items.map(n=>{const inner=`<time>${escH(n.date||'—')}</time><span class="tag">${escH(n.tag||'お知らせ')}</span><span>${escH(n.title)}</span>`;
+    return `<li>${/^https?:\/\//.test(n.url||'')?`<a href="${escH(n.url)}">${inner}</a>`:`<a aria-disabled="true">${inner}</a>`}</li>`}).join('');})();
+
+/* ---------- MOVIE ---------- */
 const main=document.getElementById('movieMain');
-function playMovie(id){ if(!id) return;
-  main.innerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}" title="EXTREME FUKUSHIMA movie" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>`;}
+const movies=(SITE.movies||[]).map(m=>({...m,id:ytId(m.youtubeId)}));
+function playMovie(m){
+  main.innerHTML=m&&m.id
+    ?`<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(m.id)}" title="${escH(m.title)}" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>`
+    :'<div style="position:absolute;inset:0;display:grid;place-items:center;color:#888;font-size:14px">▶ 動画は準備中です</div>';
+}
+document.getElementById('movieThumbs').innerHTML=movies.map((m,i)=>
+  `<button class="${i===0?'on':''}" data-i="${i}"><div class="th${m.id?' has-img':''}"${m.id?` style="background-image:url('https://i.ytimg.com/vi/${m.id}/hqdefault.jpg')"`:''}><span>${escH(m.label)}</span></div><span>${escH(m.title)}</span></button>`).join('');
 document.querySelectorAll('#movieThumbs button').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('#movieThumbs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');playMovie(b.dataset.id);}));
-playMovie(document.querySelector('#movieThumbs button.on').dataset.id);
+  document.querySelectorAll('#movieThumbs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');playMovie(movies[b.dataset.i]);}));
+playMovie(movies[0]);
+
+/* ---------- MAP ---------- */
+(()=>{const box=document.getElementById('mapBox');const u=String(SITE.mapEmbedUrl||'').trim();
+  box.innerHTML=/^https:\/\/www\.google\.com\/maps\/d\/(u\/\d+\/)?embed\?/.test(u)
+    ?`<iframe src="${escH(u)}" title="ACTIVITY MAP" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`
+    :'Google マイマップ埋め込み枠（準備中）';})();
+
+/* テスト版表示 */
+if(SITE.preview)document.body.insertAdjacentHTML('beforeend','<div class="preview-badge">テスト版</div>');
 
 /* ---------- Instagram feed ----------
    ページ側はトークンを一切持たない。
