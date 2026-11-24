@@ -2,6 +2,7 @@
 #  - main に変更が入ったとき（index.html の修正など）に自動で公開
 #  - instagram-feed で投稿に変化があったときも、そこから呼び出されて公開
 #  - 手動実行も可（Actions → deploy-pages → Run workflow）
+# GitHub 推奨の形（build と deploy を別ジョブ）に分けています
 name: deploy-pages
 on:
   push:
@@ -14,21 +15,28 @@ permissions:
   pages: write
   id-token: write
 
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    concurrency:
-      group: pages
-      cancel-in-progress: false
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v5
         with: { ref: main }   # Instagram 更新直後の最新コミットを公開するため main を明示
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with: { path: . }
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
