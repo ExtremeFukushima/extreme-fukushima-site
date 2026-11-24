@@ -25,35 +25,47 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions: { contents: write }
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20 }
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: 24 }
       - name: Fetch Instagram
         run: node scripts/fetch-instagram.mjs
         env:
           IG_ACCESS_TOKEN: "${{ secrets.IG_ACCESS_TOKEN }}"
           IG_USER_ID: "${{ secrets.IG_USER_ID }}"
       - name: Commit if changed
+        id: commit
         run: |
           git add -A data assets/instagram
           if git diff --cached --quiet; then
             echo "変更なし"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             git config user.name "instagram-bot"
             git config user.email "instagram-bot@users.noreply.github.com"
             git commit -m "chore: update instagram feed"
             git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
+
+  # 投稿に変化があったときだけサイトを再公開（GitHub Pages）
+  deploy:
+    needs: feed
+    if: needs.feed.outputs.changed == 'true'
+    permissions: { contents: read, pages: write, id-token: write }
+    uses: ./.github/workflows/pages.yml
 
   setup-fb-token:
     if: github.event_name == 'workflow_dispatch' && inputs.task == 'setup-fb-token'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20 }
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: 24 }
       - name: Convert to page token & update secret
         run: |
           NEW=$(node scripts/fetch-instagram.mjs --setup-fb)
@@ -74,9 +86,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20 }
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: 24 }
       - name: Refresh token & update secret
         run: |
           NEW=$(node scripts/fetch-instagram.mjs --refresh)
