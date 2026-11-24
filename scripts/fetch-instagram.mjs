@@ -15,6 +15,8 @@
  * 環境変数:
  *   IG_ACCESS_TOKEN   アクセストークン（必須）
  *   IG_USERNAME       対象アカウント（既定: extreme_fukushima_official）
+ *   IG_USER_ID        Instagram アカウントID（数字）。EAA…のシステムユーザートークン等で
+ *                     ページ権限が無い場合に指定（指定すればページ経由の検索を省略）
  *   META_APP_ID       --setup-fb のときのみ必要（アプリID）
  *   META_APP_SECRET   --setup-fb のときのみ必要（app secret）
  *
@@ -96,12 +98,19 @@ async function findPageByUser(tok, withToken = false) {
     throw new StopError(
       `@${USERNAME} と連携した Facebook ページが見つかりません。\n` +
       `取得できたページ:\n${list}\n` +
-      `→ Instagram と Facebook ページの連携、およびトークンの権限（pages_show_list / instagram_basic / pages_read_engagement）を確認してください。`);
+      `→ システムユーザートークンの場合は、シークレット IG_USER_ID に Instagram アカウントID（数字）を登録してください。\n` +
+      `→ それ以外は、Instagram と Facebook ページの連携、およびトークンの権限（pages_show_list / instagram_basic / pages_read_engagement）を確認してください。`);
   }
   return hit;
 }
 
 async function resolveIgUserFb() {
+  // IG_USER_ID が指定されていれば直接使う（システムユーザートークンなど、ページ権限が無い場合）
+  const fixedId = (process.env.IG_USER_ID || '').trim();
+  if (fixedId) {
+    if (!/^\d+$/.test(fixedId)) throw new StopError('IG_USER_ID は数字のみで指定してください（例: 17841400000000000）');
+    return request(`${FB_API}/${fixedId}?fields=id,username&access_token=${T}`);
+  }
   const r = await igFromPageToken(token);
   if (r) {
     if (!r.ig) throw new StopError(`ページ「${r.page.name}」に Instagram アカウントが連携されていません。`);
